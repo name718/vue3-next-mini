@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    // 指定项目的根目录
+    "rootDir": ".",
+    // 启用严格模式
+    "strict": true,
+    // 指定模块解析策略
+    "moduleResolution": "node",
+    // 启用 ES Module 互操作性
+    "esModuleInterop": true,
+    // 指定 JavaScript 目标版本
+    "target": "es5",
+    // 禁用未使用的局部变量报错
+    "noUnusedLocals": false,
+    // 禁用未使用的参数报错
+    "noUnusedParameters": false,
+    // 启用 JSON 模块解析
+    "resolveJsonModule": true,
+    // 支持降级迭代器语法
+    "downlevelIteration": true,
+    // 允许隐式的 any 类型
+    "noImplicitAny": false,
+    // 指定模块格式
+    "module": "esnext",
+    // 转译时保留注释
+    "removeComments": false,
+    // 禁用 Source Map
+    "sourceMap": false,
+    // 指定编译时的库
+    "lib": ["esnext", "dom"]
+  },
+  "include": ["packages/*/src"]
+}
