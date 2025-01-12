@@ -27,7 +27,9 @@
     // 禁用 Source Map
     "sourceMap": false,
     // 指定编译时的库
-    "lib": ["esnext", "dom"]
+    "lib": ["esnext", "dom"],
+    "baseUrl": ".",
+    "paths": {"@vue/*":["packages/*/src"]}
   },
   "include": ["packages/*/src"]
 }
