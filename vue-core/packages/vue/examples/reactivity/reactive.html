@@ -8,12 +8,19 @@
   </head>
   <body></body>
   <script>
-    const { reactive } = Vue
+    const { reactive, effect } = Vue
     // console.log(reactive)
 
     const obj = reactive({
-      name: 'mjt'
+      name: '张三'
     })
-    console.log(obj)
+
+    effect(() => {
+      console.log('effect', obj.name)
+    })
+    console.log(obj.name)
+    setTimeout(() => {
+      obj.name = '李四'
+    }, 2000)
   </script>
 </html>

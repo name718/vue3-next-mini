@@ -68,3 +68,11 @@ const p = new Proxy(obj, {
 
 console.log(p.fullName); // 应该出发三次，但是只有一次
 ```
+
+## 触发依赖
+
+## 收集依赖
+
+## effect 是如何准确的 fn 和哪个对象的哪个属性绑定起来呢
+
+![alt text](image.png)
