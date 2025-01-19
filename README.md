@@ -76,3 +76,11 @@ console.log(p.fullName); // 应该出发三次，但是只有一次
 ## effect 是如何准确的 fn 和哪个对象的哪个属性绑定起来呢
 
 ![alt text](image.png)
+
+## 结构之后是失去响应式的
+
+## reactive 只有对象，不能代理简单的数据类型
+
+## ref
+
+### 如果是对象 其实是 reactive 逻辑，但是会同时触发 get 和 set
