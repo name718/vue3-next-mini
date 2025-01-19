@@ -84,3 +84,5 @@ console.log(p.fullName); // 应该出发三次，但是只有一次
 ## ref
 
 ### 如果是对象 其实是 reactive 逻辑，但是会同时触发 get 和 set
+
+## ref 对于简单的数据类型，要主动触发 get value 和 set value，并不是响应式的
