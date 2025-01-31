@@ -86,3 +86,9 @@ console.log(p.fullName); // 应该出发三次，但是只有一次
 ### 如果是对象 其实是 reactive 逻辑，但是会同时触发 get 和 set
 
 ## ref 对于简单的数据类型，要主动触发 get value 和 set value，并不是响应式的
+
+# computed
+
+## 第一个参数是 getterOrOption 第二个参数是 setter
+
+## 数据缓存是内部的脏变量控制
