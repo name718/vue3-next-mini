@@ -9,3 +9,7 @@ export function isObject(target: any) {
 export function hasChanged(value: any, oldValue: any) {
   return !Object.is(value, oldValue)
 }
+
+export function isFunction(target: any) {
+  return typeof target === 'function'
+}

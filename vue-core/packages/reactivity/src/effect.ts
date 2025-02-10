@@ -1,3 +1,4 @@
+import { ComputedRefImpl } from './computed'
 import { createDep, Dep } from './deps'
 import { isArray } from '@vue/shared'
 
@@ -12,6 +13,7 @@ const targetMap = new WeakMap<any, KeyToDepMap>()
 export let activeEffect: ReactiveEffect | undefined
 
 export class ReactiveEffect<T = any> {
+  computed?: ComputedRefImpl<T>
   constructor(public fn: () => T) {}
 
   run() {
