@@ -92,3 +92,5 @@ console.log(p.fullName); // 应该出发三次，但是只有一次
 ## 第一个参数是 getterOrOption 第二个参数是 setter
 
 ## 数据缓存是内部的脏变量控制
+
+## computed 是懒执行的 脏数据-状态-缓存值 调度器

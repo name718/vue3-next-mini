@@ -2,6 +2,7 @@ import { ComputedRefImpl } from './computed'
 import { createDep, Dep } from './deps'
 import { isArray } from '@vue/shared'
 
+export type EffectScheduler = (...args: any[]) => any
 export function effect<T = any>(fn: () => T) {
   const _effect = new ReactiveEffect(fn)
   _effect.run()
@@ -14,7 +15,10 @@ export let activeEffect: ReactiveEffect | undefined
 
 export class ReactiveEffect<T = any> {
   computed?: ComputedRefImpl<T>
-  constructor(public fn: () => T) {}
+  constructor(
+    public fn: () => T,
+    public scheduler: EffectScheduler | null = null
+  ) {}
 
   run() {
     activeEffect = this
@@ -74,5 +78,8 @@ export function triggerEffects(dep: Dep) {
   }
 }
 export function triggerEffect(effect: ReactiveEffect) {
+  if (effect.scheduler) {
+    effect.scheduler()
+  }
   effect.run()
 }
