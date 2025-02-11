@@ -72,9 +72,16 @@ export function trigger(target: object, key: unknown, newValue: unknown) {
 
 export function triggerEffects(dep: Dep) {
   const effects = isArray(dep) ? dep : [...dep]
-
+  // computed 的缓存问题
   for (const effect of effects) {
-    triggerEffect(effect)
+    if (effect.computed) {
+      triggerEffect(effect)
+    }
+  }
+  for (const effect of effects) {
+    if (!effect.computed) {
+      triggerEffect(effect)
+    }
   }
 }
 export function triggerEffect(effect: ReactiveEffect) {

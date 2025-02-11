@@ -94,3 +94,93 @@ console.log(p.fullName); // 应该出发三次，但是只有一次
 ## 数据缓存是内部的脏变量控制
 
 ## computed 是懒执行的 脏数据-状态-缓存值 调度器
+
+## 计算属性的缓存-先执行计算属性的 effect 然后在执行非计算属性的 effect
+
+计算属性的缓存机制主要通过以下几个关键部分实现：
+
+1. 在 `ComputedRefImpl` 类中：
+
+```typescript:/Users/majuntao/Downloads/code/vue3-next-mini/vue-core/packages/reactivity/src/computed.ts
+export class ComputedRefImpl<T> {
+  private _dirty = true;      // 控制是否需要重新计算的标志
+  private _value!: T;         // 缓存值
+
+  constructor(getter) {
+    // 创建 effect 实例，并传入调度器
+    this.effect = new ReactiveEffect(getter, () => {
+      // 当依赖的响应式数据变化时，将 _dirty 置为 true
+      if (!this._dirty) {
+        this._dirty = true;
+      }
+    });
+  }
+
+  get value() {
+    // 脏数据时才重新计算
+    if (this._dirty) {
+      this._value = this.effect.run();
+      this._dirty = false;    // 计算完成后，将 _dirty 置为 false
+    }
+    return this._value;       // 返回缓存值
+  }
+}
+```
+
+2. 在 `effect.ts` 中的触发机制：
+
+```typescript:/Users/majuntao/Downloads/code/vue3-next-mini/vue-core/packages/reactivity/src/effect.ts
+export function triggerEffects(dep: Dep) {
+  const effects = isArray(dep) ? dep : [...dep];
+
+  // 优先触发计算属性的更新
+  for (const effect of effects) {
+    if (effect.computed) {
+      triggerEffect(effect);
+    }
+  }
+  // 再触发普通的 effect
+  for (const effect of effects) {
+    if (!effect.computed) {
+      triggerEffect(effect);
+    }
+  }
+}
+
+export function triggerEffect(effect: ReactiveEffect) {
+  // 如果有调度器，优先执行调度器
+  if (effect.scheduler) {
+    effect.scheduler();
+  } else {
+    effect.run();
+  }
+}
+```
+
+缓存机制的工作流程：
+
+1. **初始化**：
+
+   - 创建计算属性时，`_dirty` 初始为 `true`
+   - `_value` 用于存储计算结果
+
+2. **首次访问**：
+
+   - 当 `_dirty` 为 `true` 时，执行计算
+   - 将结果存储在 `_value` 中
+   - 将 `_dirty` 设置为 `false`
+
+3. **依赖更新**：
+
+   - 当依赖的响应式数据变化时，调度器被触发
+   - 调度器将 `_dirty` 设置为 `true`
+
+4. **再次访问**：
+   - 如果 `_dirty` 为 `false`，直接返回缓存的 `_value`
+   - 如果 `_dirty` 为 `true`，重新计算并更新缓存
+
+这种机制确保了：
+
+- 计算属性只在必要时才重新计算
+- 多次访问同一个计算属性时可以直接返回缓存值
+- 依赖变化时能够正确地触发重新计算
