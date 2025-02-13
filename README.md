@@ -184,3 +184,7 @@ export function triggerEffect(effect: ReactiveEffect) {
 - 计算属性只在必要时才重新计算
 - 多次访问同一个计算属性时可以直接返回缓存值
 - 依赖变化时能够正确地触发重新计算
+
+# watch
+
+- 1. watch -> doWatch -> 判断 ref -> 判断 reactive（默认 deep:true）-> job 函数
