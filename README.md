@@ -188,3 +188,156 @@ export function triggerEffect(effect: ReactiveEffect) {
 # watch
 
 - 1. watch -> doWatch -> 判断 ref -> 判断 reactive（默认 deep:true）-> job 函数
+
+1. **入口函数 watch**：
+
+```typescript
+watch(source, callback, options);
+```
+
+2. **doWatch 处理流程**：
+
+   - 判断数据源类型：
+     - 如果是 ref，直接获取 `.value`
+     - 如果是 reactive，默认进行深度监听（deep: true）
+   - 创建 job 函数（用于处理回调）
+   - 创建 effect 实例
+
+3. **数据源处理**：
+
+   - ref 类型：直接监听 `.value` 的变化
+   - reactive 类型：
+     - 深度监听：遍历对象的所有属性
+     - 非深度监听：只监听对象本身
+
+4. **调度器处理**：
+
+   - 创建 scheduler 函数
+   - 根据配置决定是否立即执行（immediate）
+   - 处理防抖（debounce）和节流（throttle）
+
+5. **回调执行**：
+   - job 函数负责执行用户的回调
+   - 传入新值和旧值
+   - 处理清理函数（cleanup）
+
+主要流程图：
+
+```plaintext
+watch
+  ↓
+doWatch
+  ↓
+判断数据源类型 → ref/reactive
+  ↓
+创建 job 函数
+  ↓
+创建 effect 实例
+  ↓
+根据 options 配置执行相应逻辑
+  ↓
+数据变化时触发 scheduler
+  ↓
+执行 job 函数
+  ↓
+调用用户回调
+```
+
+关键特点：
+
+1. 支持多种数据源（ref、reactive、函数）
+2. 可配置立即执行（immediate）
+3. 支持深度监听（deep）
+4. 可以处理清理函数
+5. 支持异步执行（flush: 'post'）
+
+这就是 watch 的主要执行流程。它通过响应式系统来追踪依赖变化，并在适当的时机触发用户的回调函数。
+
+假设我们有如下代码：
+
+```js
+const count = ref(0);
+effect(() => {
+  console.log(count.value);
+});
+```
+
+依赖收集的流程如下：
+
+1. **创建 ref**：
+
+```typescript
+const count = ref(0);
+// 内部会创建 RefImpl 实例
+class RefImpl {
+  private _value;
+  public dep; // 存储依赖的容器
+
+  constructor(value) {
+    this._value = value;
+    this.dep = new Set(); // 创建依赖集合
+  }
+}
+```
+
+2. **effect 执行**：
+
+```typescript
+effect(() => {
+  // 1. 创建 ReactiveEffect 实例
+  const _effect = new ReactiveEffect(fn);
+  // 2. 设置当前活跃的 effect
+  activeEffect = _effect;
+  // 3. 执行用户传入的函数，这会触发 ref 的 get 操作
+  _effect.run();
+});
+```
+
+3. **触发 ref 的 get 操作**：
+
+```typescript
+class RefImpl {
+  get value() {
+    // 1. 触发依赖收集
+    trackRefValue(this);
+    // 2. 返回值
+    return this._value;
+  }
+}
+
+function trackRefValue(ref) {
+  if (activeEffect) {
+    // 将当前活跃的 effect 添加到 ref 的依赖集合中
+    ref.dep.add(activeEffect);
+  }
+}
+```
+
+整个流程图：
+
+```plaintext
+创建 ref
+  ↓
+创建 effect
+  ↓
+设置 activeEffect
+  ↓
+执行用户函数
+  ↓
+访问 ref.value
+  ↓
+触发 trackRefValue
+  ↓
+将 effect 存储到 dep 中
+```
+
+这样，当 ref 的值发生变化时，就可以通过存储的 dep 找到所有相关的 effect 并触发更新。
+
+关键点：
+
+1. ref 通过 dep 存储依赖
+2. effect 执行时会设置全局的 activeEffect
+3. 访问 ref.value 时会触发依赖收集
+4. 依赖收集就是将 activeEffect 存入 dep 中
+
+这就是 ref 的依赖收集流程。这种机制确保了响应式系统能够准确地知道哪些 effect 依赖于哪些数据，从而在数据变化时精确地触发更新。
